@@ -73,5 +73,5 @@ class DataHelper():
 
 if __name__ == '__main__':
     data=DataHelper('data')
-    lines=data.read_data('data/msr_training.txt')
+    lines=data.read_data('data/msr_train.txt')
     print(lines)
