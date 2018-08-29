@@ -87,6 +87,66 @@ class DataHelper():
         self.tag2id=tag2id
         self.id2tag=id2tag
 
+    def X_padding(self,words):
+        """
+        把words转为id形式，并自动补全位 max_len长度
+        :param words:
+        :return:
+        """
+        max_len=self.max_len
+        word2id=self.word2id
+        ids=list(word2id[words])
+        if len(ids)>=max_len: # 长则去掉
+            return ids[:max_len]
+        ids.extend([0]*(max_len-len(ids))) # 短则补全
+        return ids
+
+    def y_padding(self,tags):
+        """
+        把tags转为id形式，并自动补全位max_len长度
+        :param tags:
+        :return:
+        """
+        max_len=self.max_len
+        tag2id=self.tag2id
+        ids=list(tag2id[tags])
+        if len(ids)>max_len: # 长则去掉
+            return ids[:max_len]
+        ids.extend([0]*(max_len-len(ids))) # 短则补全
+        return ids
+
+    def save_model(self,model_path):
+        """
+        保存处理好的数据
+        :param model_path:
+        :return:
+        """
+        with open(model_path,'wb') as out_data:
+            pickle.dump(self.X,out_data,pickle.HIGHEST_PROTOCOL)
+            pickle.dump(self.y,out_data,pickle.HIGHEST_PROTOCOL)
+            pickle.dump(self.word2id,out_data,pickle.HIGHEST_PROTOCOL)
+            pickle.dump(self.id2word,out_data,pickle.HIGHEST_PROTOCOL)
+            pickle.dump(self.tag2id,out_data,pickle.HIGHEST_PROTOCOL)
+            pickle.dump(self.id2tag,out_data,pickle.HIGHEST_PROTOCOL)
+            pickle.dump(self.labels,out_data,pickle.HIGHEST_PROTOCOL)
+            print("**Finished saving the data.")
+
+    def load_model(self,model_path):
+        """
+        如果存在保存的数据，就直接加载
+        :param model_path:
+        :return:
+        """
+        with open(model_path,'rb') as in_data:
+            self.X=pickle.load(in_data)
+            self.y=pickle.load(in_data)
+            self.word2id=pickle.load(in_data)
+            self.id2word=pickle.load(in_data)
+            self.tag2id=pickle.load(in_data)
+            self.id2tag=pickle.load(in_data)
+            self.labels=pickle.load(in_data)
+
+
     def process_data(self,filename):
         """
         预处理训练数据
@@ -108,12 +168,34 @@ class DataHelper():
         df_data=pd.DataFrame({'words':datas,'labels':labels},index=range(len(datas)))
         # 句子长度
         df_data['sentence_len']=df_data['words'].apply(lambda words:len(words))
+        self.transform(df_data)
+        df_data['X']=df_data['words'].apply(self.X_padding)
+        df_data['y']=df_data['tags'].apply(self.y_padding())
+        self.df_data=df_data
+        X=np.asarray(list(df_data['X'].values))
+        y=np.asarray(list(df_data['y'].values))
+        self.X=X
+        self.y=y
+        self.labels=labels
+        self.save_model(self.model_path)
 
 
+    def text2ids(self,text):
+        """
+        将文本转为id表示
+        :param text:
+        :return:
+        """
+        words=list(text)
+        max_len=self.max_len
+        ids=list(self.word2id[words])
 
-
-
-
+        if len(ids) >= max_len:  # 长则弃掉
+            print ("输出片段超过%d部分无法处理" % (max_len))
+            return ids[:max_len]
+        ids.extend([0]*(max_len-len(ids))) # 短则补全
+        ids = np.asarray(ids).reshape([-1, max_len])
+        return ids
 
 if __name__ == '__main__':
     data=DataHelper('data')

@@ -23,15 +23,15 @@ str='偶尔  有  老乡  拥  上来  想  看  “  大官  ”  ，  立即  
 # print(list(all_letters))
 
 
-# words=["我","北京","天安门"]
-# word2id={word:index for index,word in enumerate(words)}
-# id2word={index:word for index,word in enumerate(words)}
-# print(word2id)
-# print(id2word)
-#
-# import pandas as pd
-# ids=range(len(words))
-# word2id=pd.Series(ids,index=words).to_dict()
-# id2word=pd.Series(words,index=ids).to_dict()
-# print(word2id)
-# print(id2word)
+words=["我","北京","天安门"]
+word2id={word:index for index,word in enumerate(words)}
+id2word={index:word for index,word in enumerate(words)}
+print(word2id)
+print(id2word)
+
+import pandas as pd
+ids=range(len(words))
+word2id=pd.Series(ids,index=words).to_dict()
+id2word=pd.Series(words,index=ids).to_dict()
+print(word2id)
+print(id2word)
